@@ -4,10 +4,20 @@ const statusbox = document.getElementById("status");
 const welcomescreen = document.getElementById("welcome-screen");
 const workspace = document.getElementById("maze-workspace");
 
-let rows = 21, cols = 31, grid = [];
-let start = [1, 1], end = [19, 29];
-let trail = [], head = [1, 1], lastResults = {};
-const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+let rows = 21,
+  cols = 31,
+  grid = [];
+let start = [1, 1],
+  end = [19, 29];
+let trail = [],
+  head = [1, 1],
+  lastResults = {};
+const dirs = [
+  [-1, 0],
+  [1, 0],
+  [0, -1],
+  [0, 1],
+];
 
 document.getElementById("start-app").addEventListener("click", () => {
   welcomescreen.hidden = true;
@@ -24,21 +34,40 @@ function makeMaze() {
   if (typeof stopComparison === "function") stopComparison();
   rows = Number(sizeinput.value);
   cols = rows === 11 ? 15 : rows === 21 ? 31 : 45;
-  start = [1,1]; end = [rows-2, cols-2];
-  head = [...start]; trail = [[...start]];
-  grid = Array.from({length:rows}, () => Array(cols).fill("#"));
-  const todo = [[1,1]];
+  start = [1, 1];
+  end = [rows - 2, cols - 2];
+  head = [...start];
+  trail = [[...start]];
+  grid = Array.from({ length: rows }, () => Array(cols).fill("#"));
+  const todo = [[1, 1]];
   grid[1][1] = " ";
-  const carveDirs = [[-2,0],[2,0],[0,-2],[0,2]];
+  const carveDirs = [
+    [-2, 0],
+    [2, 0],
+    [0, -2],
+    [0, 2],
+  ];
   while (todo.length) {
-    const [r,c] = todo[todo.length-1];
-    const options = carveDirs.map(([dr,dc]) => [r+dr,c+dc,dr,dc])
-      .filter(([nr,nc]) => nr>0 && nr<rows-1 && nc>0 && nc<cols-1 && grid[nr][nc]==="#");
-    if (!options.length) { todo.pop(); continue; }
-    const [nr,nc,dr,dc] = options[Math.floor(Math.random()*options.length)];
-    grid[r+dr/2][c+dc/2] = " ";
+    const [r, c] = todo[todo.length - 1];
+    const options = carveDirs
+      .map(([dr, dc]) => [r + dr, c + dc, dr, dc])
+      .filter(
+        ([nr, nc]) =>
+          nr > 0 &&
+          nr < rows - 1 &&
+          nc > 0 &&
+          nc < cols - 1 &&
+          grid[nr][nc] === "#",
+      );
+    if (!options.length) {
+      todo.pop();
+      continue;
+    }
+    const [nr, nc, dr, dc] =
+      options[Math.floor(Math.random() * options.length)];
+    grid[r + dr / 2][c + dc / 2] = " ";
     grid[nr][nc] = " ";
-    todo.push([nr,nc]);
+    todo.push([nr, nc]);
   }
   grid[start[0]][start[1]] = "S";
   grid[end[0]][end[1]] = "E";
@@ -52,29 +81,32 @@ function makeMaze() {
   solutionButton.textContent = "Show solution & compare BFS vs DFS";
 }
 
-function moveHead(dr,dc) {
+function moveHead(dr, dc) {
   if (welcomescreen.hidden === false || workspace.hidden) return;
-  const nr = head[0]+dr, nc = head[1]+dc;
-  if (nr<0 || nr>=rows || nc<0 || nc>=cols || grid[nr][nc]==="#") {
+  const nr = head[0] + dr,
+    nc = head[1] + dc;
+  if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || grid[nr][nc] === "#") {
     statusbox.innerHTML = "<i></i> WALL BLOCKED";
     return;
   }
   if (trail.length > 1) {
-    const previous = trail[trail.length-2];
-    if (previous[0]===nr && previous[1]===nc) {
-      trail.pop(); head = [nr,nc]; drawMaze();
+    const previous = trail[trail.length - 2];
+    if (previous[0] === nr && previous[1] === nc) {
+      trail.pop();
+      head = [nr, nc];
+      drawMaze();
       statusbox.innerHTML = "<i></i> PATH RETRACED";
       return;
     }
   }
-  if (trail.some(([r,c]) => r===nr && c===nc)) {
+  if (trail.some(([r, c]) => r === nr && c === nc)) {
     statusbox.innerHTML = "<i></i> RETRACE YOUR PATH";
     return;
   }
-  head = [nr,nc];
+  head = [nr, nc];
   trail.push([...head]);
   drawMaze();
-  if (nr===end[0] && nc===end[1]) {
+  if (nr === end[0] && nc === end[1]) {
     statusbox.innerHTML = "<i></i> DESTINATION REACHED!";
     showCongratulations();
   } else {
@@ -82,65 +114,91 @@ function moveHead(dr,dc) {
   }
 }
 
-document.addEventListener("keydown", event => {
+document.addEventListener("keydown", (event) => {
   if (workspace.hidden) return;
   const active = document.activeElement;
-  if (active && ["INPUT","SELECT","TEXTAREA","BUTTON"].includes(active.tagName)) return;
-  const keyDirs = {ArrowUp:[-1,0], ArrowDown:[1,0], ArrowLeft:[0,-1], ArrowRight:[0,1]};
+  if (
+    active &&
+    ["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(active.tagName)
+  )
+    return;
+  const keyDirs = {
+    ArrowUp: [-1, 0],
+    ArrowDown: [1, 0],
+    ArrowLeft: [0, -1],
+    ArrowRight: [0, 1],
+  };
   if (!keyDirs[event.key]) return;
   event.preventDefault();
   moveHead(...keyDirs[event.key]);
 });
 
-function drawMaze(explored=[], path=[]) {
-  const exploredSet = new Set(explored.map(([r,c])=>`${r},${c}`));
-  const pathSet = new Set(path.map(([r,c])=>`${r},${c}`));
-  const trailSet = new Set(trail.map(([r,c])=>`${r},${c}`));
+function drawMaze(explored = [], path = []) {
+  const exploredSet = new Set(explored.map(([r, c]) => `${r},${c}`));
+  const pathSet = new Set(path.map(([r, c]) => `${r},${c}`));
+  const trailSet = new Set(trail.map(([r, c]) => `${r},${c}`));
   mazearea.innerHTML = "";
   mazearea.style.gridTemplateColumns = `repeat(${cols}, auto)`;
   const frag = document.createDocumentFragment();
-  for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    const v = grid[r][c], key = `${r},${c}`;
-    if (v==="#") cell.classList.add("wall");
-    if (exploredSet.has(key)) cell.classList.add("explored");
-    if (trailSet.has(key)) cell.classList.add("trail-cell");
-    if (pathSet.has(key)) cell.classList.add("route");
-    if (v==="S") cell.classList.add("start");
-    if (v==="E") cell.classList.add("end");
-    if (r===head[0] && c===head[1]) cell.classList.add("head");
-    frag.appendChild(cell);
-  }
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      const v = grid[r][c],
+        key = `${r},${c}`;
+      if (v === "#") cell.classList.add("wall");
+      if (exploredSet.has(key)) cell.classList.add("explored");
+      if (trailSet.has(key)) cell.classList.add("trail-cell");
+      if (pathSet.has(key)) cell.classList.add("route");
+      if (v === "S") cell.classList.add("start");
+      if (v === "E") cell.classList.add("end");
+      if (r === head[0] && c === head[1]) cell.classList.add("head");
+      frag.appendChild(cell);
+    }
   mazearea.appendChild(frag);
 }
 
 function search(algo) {
-  const pending = [start], seen = new Set([start.join(",")]);
+  const pending = [start],
+    seen = new Set([start.join(",")]);
   let index = 0;
-  const parent = new Map(), explored = [];
-  while (algo==="bfs" ? index<pending.length : pending.length>0) {
-    const cur = algo==="bfs" ? pending[index++] : pending.pop();
+  const parent = new Map(),
+    explored = [];
+  while (algo === "bfs" ? index < pending.length : pending.length > 0) {
+    const cur = algo === "bfs" ? pending[index++] : pending.pop();
     const key = cur.join(",");
     explored.push(cur);
-    if (cur[0]===end[0] && cur[1]===end[1]) break;
-    for (const [dr,dc] of dirs) {
-      const nr=cur[0]+dr, nc=cur[1]+dc, nextkey=`${nr},${nc}`;
-      if (nr<0 || nr>=rows || nc<0 || nc>=cols || grid[nr][nc]==="#" || seen.has(nextkey)) continue;
-      seen.add(nextkey); parent.set(nextkey,key); pending.push([nr,nc]);
+    if (cur[0] === end[0] && cur[1] === end[1]) break;
+    for (const [dr, dc] of dirs) {
+      const nr = cur[0] + dr,
+        nc = cur[1] + dc,
+        nextkey = `${nr},${nc}`;
+      if (
+        nr < 0 ||
+        nr >= rows ||
+        nc < 0 ||
+        nc >= cols ||
+        grid[nr][nc] === "#" ||
+        seen.has(nextkey)
+      )
+        continue;
+      seen.add(nextkey);
+      parent.set(nextkey, key);
+      pending.push([nr, nc]);
     }
   }
-  const endkey=end.join(",");
-  if (!seen.has(endkey)) return {found:false,explored,path:[]};
-  const path=[]; let key=endkey;
+  const endkey = end.join(",");
+  if (!seen.has(endkey)) return { found: false, explored, path: [] };
+  const path = [];
+  let key = endkey;
   while (key) {
-    const [r,c]=key.split(",").map(Number);
-    path.push([r,c]);
-    if (key===start.join(",")) break;
-    key=parent.get(key);
+    const [r, c] = key.split(",").map(Number);
+    path.push([r, c]);
+    if (key === start.join(",")) break;
+    key = parent.get(key);
   }
   path.reverse();
-  return {found:true,explored,path};
+  return { found: true, explored, path };
 }
 
 function showCongratulations() {
@@ -157,7 +215,10 @@ function showCongratulations() {
       <button id="close-win" class="btn btn-outline">Continue exploring</button>
     </div>`;
   document.body.appendChild(popup);
-  document.getElementById("play-again").onclick = () => { closeCongratulations(); makeMaze(); };
+  document.getElementById("play-again").onclick = () => {
+    closeCongratulations();
+    makeMaze();
+  };
   document.getElementById("close-win").onclick = closeCongratulations;
 }
 function closeCongratulations() {
@@ -165,8 +226,11 @@ function closeCongratulations() {
   if (popup) popup.remove();
 }
 
-let bfsResult = null, dfsResult = null;
-let visualStep = 0, showFinalRoutes = false, playTimer = null;
+let bfsResult = null,
+  dfsResult = null;
+let visualStep = 0,
+  showFinalRoutes = false,
+  playTimer = null;
 
 function stopComparison() {
   if (playTimer !== null) {
@@ -181,10 +245,18 @@ function renderVisualMaze(targetId, result, step, showPath) {
   const target = document.getElementById(targetId);
   if (!target || !result) return;
   const visitedOrder = new Map();
-  result.explored.slice(0, step).forEach((cell, index) => visitedOrder.set(cell.join(","), index + 1));
-  const pathSet = new Set(showPath ? result.path.map(cell => cell.join(",")) : []);
+  result.explored
+    .slice(0, step)
+    .forEach((cell, index) => visitedOrder.set(cell.join(","), index + 1));
+  const pathSet = new Set(
+    showPath ? result.path.map((cell) => cell.join(",")) : [],
+  );
   target.innerHTML = "";
-  target.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+  target.style.display = "grid";
+  target.style.gridTemplateColumns = `repeat(${cols}, 16px)`;
+  target.style.gridAutoRows = "16px";
+  target.style.gridAutoFlow = "row";
+  target.style.gap = "2px";
   const fragment = document.createDocumentFragment();
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -221,20 +293,30 @@ function renderVisualMaze(targetId, result, step, showPath) {
 
 function renderComparison() {
   if (!bfsResult || !dfsResult) return;
-  const maxStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  const maxStep = Math.max(
+    bfsResult.explored.length,
+    dfsResult.explored.length,
+  );
   const bfsSteps = Math.min(visualStep, bfsResult.explored.length);
   const dfsSteps = Math.min(visualStep, dfsResult.explored.length);
   renderVisualMaze("bfs-visual-maze", bfsResult, bfsSteps, showFinalRoutes);
   renderVisualMaze("dfs-visual-maze", dfsResult, dfsSteps, showFinalRoutes);
   document.getElementById("bfs-step-value").textContent = bfsSteps;
   document.getElementById("dfs-step-value").textContent = dfsSteps;
-  document.getElementById("bfs-total-value").textContent = bfsResult.explored.length;
-  document.getElementById("dfs-total-value").textContent = dfsResult.explored.length;
-  document.getElementById("bfs-path-value").textContent = bfsResult.found ? `${bfsResult.path.length - 1} steps` : "No route";
-  document.getElementById("dfs-path-value").textContent = dfsResult.found ? `${dfsResult.path.length - 1} steps` : "No route";
+  document.getElementById("bfs-total-value").textContent =
+    bfsResult.explored.length;
+  document.getElementById("dfs-total-value").textContent =
+    dfsResult.explored.length;
+  document.getElementById("bfs-path-value").textContent = bfsResult.found
+    ? `${bfsResult.path.length - 1} steps`
+    : "No route";
+  document.getElementById("dfs-path-value").textContent = dfsResult.found
+    ? `${dfsResult.path.length - 1} steps`
+    : "No route";
   const counter = document.getElementById("step-counter");
   if (showFinalRoutes) counter.textContent = "Final routes highlighted";
-  else if (visualStep >= maxStep) counter.textContent = `Exploration complete · ${maxStep} steps shown`;
+  else if (visualStep >= maxStep)
+    counter.textContent = `Exploration complete · ${maxStep} steps shown`;
   else counter.textContent = `Exploration step ${visualStep} of ${maxStep}`;
   document.getElementById("step-compare").disabled = visualStep >= maxStep;
 }
@@ -244,7 +326,10 @@ function startComparison() {
     stopComparison();
     return;
   }
-  const maxStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  const maxStep = Math.max(
+    bfsResult.explored.length,
+    dfsResult.explored.length,
+  );
   if (visualStep >= maxStep) {
     visualStep = 0;
     showFinalRoutes = false;
@@ -268,8 +353,11 @@ document.getElementById("reset").addEventListener("click", () => {
   trail = [[...start]];
   lastResults = {};
   document.getElementById("comparison").classList.add("hidden");
-  document.getElementById("show-solution").textContent = "Show solution & compare BFS vs DFS";
-  document.getElementById("show-solution").setAttribute("aria-expanded", "false");
+  document.getElementById("show-solution").textContent =
+    "Show solution & compare BFS vs DFS";
+  document
+    .getElementById("show-solution")
+    .setAttribute("aria-expanded", "false");
   drawMaze();
   statusbox.innerHTML = "<i></i> READY";
 });
@@ -297,10 +385,15 @@ document.getElementById("show-solution").addEventListener("click", () => {
   }
 });
 
-document.getElementById("play-compare").addEventListener("click", startComparison);
+document
+  .getElementById("play-compare")
+  .addEventListener("click", startComparison);
 document.getElementById("step-compare").addEventListener("click", () => {
   stopComparison();
-  const maxStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  const maxStep = Math.max(
+    bfsResult.explored.length,
+    dfsResult.explored.length,
+  );
   if (visualStep < maxStep) visualStep++;
   showFinalRoutes = false;
   renderComparison();

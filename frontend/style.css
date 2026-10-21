@@ -108,3 +108,55 @@ footer span:first-child { color:var(--text); font-weight:700; }
 .compare-card .btn { margin-top:auto; }
 @media(max-width:700px) { .compare-card .btn { width:100%; } }
 
+/* FIX: BFS and DFS maze layout */
+.algorithm-maze-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.visual-maze {
+  display: grid !important;
+  width: max-content;
+  gap: 2px;
+  margin: 0 auto;
+  align-content: start;
+}
+
+.visual-cell {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.mini-maze-scroller {
+  display: block;
+  width: 100%;
+  overflow: auto;
+}
+
+.algorithm-stats {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.algorithm-stats span {
+  display: inline-block;
+}
+
+@media (max-width: 700px) {
+  .algorithm-maze-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
