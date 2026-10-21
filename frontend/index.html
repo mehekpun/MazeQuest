@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MazeQuest - a student DSA maze solver project.">
+  <title>MazeQuest | Maze Solver</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="simple-header">
+      <a class="logo" href="./">MazeQuest</a>
+      <span class="top-note">DSA MINI PROJECT</span>
+    </header>
+
+    <section id="welcome-screen" class="welcome-screen">
+      <div class="welcome-content">
+        <p class="eyebrow">DATA STRUCTURES AND ALGORITHMS</p>
+        <h1>Maze Solver</h1>
+        <p class="welcome-description">Generate a maze, explore different paths, and see how search algorithms find their way to the destination.</p>
+        <div class="team-box">
+          <h2>Project by</h2>
+          <p>Mehek Pun <span>3232</span></p>
+          <p>Yuvika Dahiya <span>3261</span></p>
+        </div>
+        <button id="start-app" class="btn btn-primary start-button">Start / Solve a Maze →</button>
+        <p class="welcome-note">Choose a maze. Find a path. Learn by exploring.</p>
+      </div>
+    </section>
+
+    <section id="maze-workspace" hidden>
+      <div class="workspace-heading">
+        <div><h1>Maze Solver</h1><p>Use the arrow keys to find the exit.</p></div>
+        <button id="back-home" class="btn btn-outline">← Home</button>
+      </div>
+
+      <section class="toolbar">
+        <div class="field">
+          <label for="size">MAZE SIZE</label>
+          <select id="size">
+            <option value="11">Small · 11 rows</option>
+            <option value="21" selected>Medium · 21 rows</option>
+            <option value="31">Large · 31 rows</option>
+          </select>
+        </div>
+        <button id="generate" class="btn btn-outline">New maze</button>
+        <button id="reset" class="btn btn-outline">Reset</button>
+      </section>
+
+      <main class="main-grid">
+        <section class="panel maze-panel">
+          <div class="panel-title">
+            <div><h2>The maze</h2><p>Use the arrow keys to find the exit.</p></div>
+            <span id="status" class="status"><i></i> READY</span>
+          </div>
+          <div class="maze-scroller"><div id="maze" aria-label="Maze grid"></div></div>
+          <div class="legend">
+            <span><i class="swatch start"></i>Start</span>
+            <span><i class="swatch end"></i>Destination</span>
+            <span><i class="swatch wall"></i>Wall</span>
+            <span><i class="swatch explored"></i>Explored</span>
+            <span><i class="swatch trail"></i>Your trail</span>
+            <span><i class="swatch route"></i>Solution</span>
+          </div>
+          <div class="keyboard-note">Tip: click the page outside the dropdown, then use your arrow keys. Move back to the previous cell to undo a step.</div>
+        </section>
+      </main>
+
+      <section class="solution-toggle">
+        <button id="show-solution" class="btn btn-outline" aria-expanded="false">Show solution & compare BFS vs DFS</button>
+        <p>Want to see how the computer solves it? Compare two ways to find a route.</p>
+      </section>
+
+      <section id="comparison" class="panel comparison hidden">
+        <div class="panel-title"><div><h2>How do the solutions compare?</h2><p>Both methods use the same maze.</p></div></div>
+        <div class="comparison-graph">
+          <h3>Cells explored</h3>
+          <p class="graph-hint">Shorter bars mean fewer cells were checked.</p>
+          <div class="bar-row"><span>BFS</span><div class="bar-track"><div id="bfs-explored-bar" class="bar bfs-bar"></div></div><strong id="bfs-explored-value">—</strong></div>
+          <div class="bar-row"><span>DFS</span><div class="bar-track"><div id="dfs-explored-bar" class="bar dfs-bar"></div></div><strong id="dfs-explored-value">—</strong></div>
+          <h3 class="path-graph-title">Path length</h3>
+          <p class="graph-hint">Number of steps from Start to Destination.</p>
+          <div class="bar-row"><span>BFS</span><div class="bar-track"><div id="bfs-length-bar" class="bar bfs-bar"></div></div><strong id="bfs-length-value">—</strong></div>
+          <div class="bar-row"><span>DFS</span><div class="bar-track"><div id="dfs-length-bar" class="bar dfs-bar"></div></div><strong id="dfs-length-value">—</strong></div>
+        </div>
+        <div class="comparison-grid">
+          <div class="compare-card">
+            <h3>Shortest path</h3>
+            <p><strong>BFS · Breadth-first search</strong></p>
+            <p>Checks nearby cells first to find the shortest route.</p>
+            <p>Path length: <strong id="bfs-length">—</strong></p>
+            <p id="bfs-explored">Cells checked: —</p>
+            <button id="show-bfs" class="btn btn-outline">Show BFS route</button>
+          </div>
+          <div class="compare-card">
+            <h3>Deep exploration</h3>
+            <p><strong>DFS · Depth-first search</strong></p>
+            <p>Follows one route until it must backtrack.</p>
+            <p>Path length: <strong id="dfs-length">—</strong></p>
+            <p id="dfs-explored">Cells checked: —</p>
+            <button id="show-dfs" class="btn btn-outline">Show DFS route</button>
+          </div>
+        </div>
+      </section>
+
+      <footer><span>MazeQuest</span><span>Mehek Pun · 3232 &nbsp; | &nbsp; Yuvika Dahiya · 3261</span></footer>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
