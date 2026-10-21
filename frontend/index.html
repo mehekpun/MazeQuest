@@ -73,35 +73,42 @@
       </section>
 
       <section id="comparison" class="panel comparison hidden">
-        <div class="panel-title"><div><h2>How do the solutions compare?</h2><p>Both methods use the same maze.</p></div></div>
-        <div class="comparison-graph">
-          <h3>Cells explored</h3>
-          <p class="graph-hint">Shorter bars mean fewer cells were checked.</p>
-          <div class="bar-row"><span>BFS</span><div class="bar-track"><div id="bfs-explored-bar" class="bar bfs-bar"></div></div><strong id="bfs-explored-value">—</strong></div>
-          <div class="bar-row"><span>DFS</span><div class="bar-track"><div id="dfs-explored-bar" class="bar dfs-bar"></div></div><strong id="dfs-explored-value">—</strong></div>
-          <h3 class="path-graph-title">Path length</h3>
-          <p class="graph-hint">Number of steps from Start to Destination.</p>
-          <div class="bar-row"><span>BFS</span><div class="bar-track"><div id="bfs-length-bar" class="bar bfs-bar"></div></div><strong id="bfs-length-value">—</strong></div>
-          <div class="bar-row"><span>DFS</span><div class="bar-track"><div id="dfs-length-bar" class="bar dfs-bar"></div></div><strong id="dfs-length-value">—</strong></div>
+        <div class="panel-title">
+          <div><h2>Watch BFS and DFS explore</h2><p>Both algorithms solve the exact same maze. The number in a cell shows the order in which it was processed.</p></div>
         </div>
-        <div class="comparison-grid">
-          <div class="compare-card">
-            <h3>Shortest path</h3>
-            <p><strong>BFS · Breadth-first search</strong></p>
-            <p>Checks nearby cells first to find the shortest route.</p>
-            <p>Path length: <strong id="bfs-length">—</strong></p>
-            <p id="bfs-explored">Cells checked: —</p>
-            <button id="show-bfs" class="btn btn-outline">Show BFS route</button>
-          </div>
-          <div class="compare-card">
-            <h3>Deep exploration</h3>
-            <p><strong>DFS · Depth-first search</strong></p>
-            <p>Follows one route until it must backtrack.</p>
-            <p>Path length: <strong id="dfs-length">—</strong></p>
-            <p id="dfs-explored">Cells checked: —</p>
-            <button id="show-dfs" class="btn btn-outline">Show DFS route</button>
-          </div>
+        <div class="visualizer-controls">
+          <button id="play-compare" class="btn btn-primary">▶ Play comparison</button>
+          <button id="step-compare" class="btn btn-outline">Next step →</button>
+          <button id="restart-compare" class="btn btn-outline">↻ Restart</button>
+          <button id="show-final-paths" class="btn btn-outline">Show final paths</button>
+          <label class="speed-control" for="animation-speed">Speed
+            <select id="animation-speed">
+              <option value="500">Slow</option>
+              <option value="180" selected>Normal</option>
+              <option value="55">Fast</option>
+            </select>
+          </label>
+          <span id="step-counter" class="step-counter">Ready to explore</span>
         </div>
+        <div class="visualizer-legend">
+          <span><i class="swatch start"></i>Start</span>
+          <span><i class="swatch end"></i>Destination</span>
+          <span><i class="swatch explored"></i>Visited cell (number = order)</span>
+          <span><i class="swatch route"></i>Final route</span>
+        </div>
+        <div class="algorithm-maze-grid">
+          <article class="algorithm-maze-card">
+            <div class="algorithm-card-heading"><div><h3>BFS · Breadth-first search</h3><p>Uses a queue. Explores in layers and finds a shortest path.</p></div><span class="algorithm-pill bfs-pill">QUEUE</span></div>
+            <div class="mini-maze-scroller"><div id="bfs-visual-maze" class="visual-maze" aria-label="BFS exploration maze"></div></div>
+            <div class="algorithm-stats"><span>Processed: <strong id="bfs-step-value">0</strong></span><span>Path: <strong id="bfs-path-value">—</strong></span><span>Total explored: <strong id="bfs-total-value">—</strong></span></div>
+          </article>
+          <article class="algorithm-maze-card">
+            <div class="algorithm-card-heading"><div><h3>DFS · Depth-first search</h3><p>Uses a stack. Follows a route deeply before backtracking.</p></div><span class="algorithm-pill dfs-pill">STACK</span></div>
+            <div class="mini-maze-scroller"><div id="dfs-visual-maze" class="visual-maze" aria-label="DFS exploration maze"></div></div>
+            <div class="algorithm-stats"><span>Processed: <strong id="dfs-step-value">0</strong></span><span>Path: <strong id="dfs-path-value">—</strong></span><span>Total explored: <strong id="dfs-total-value">—</strong></span></div>
+          </article>
+        </div>
+        <p class="visualizer-note">Press Play to watch both searches side by side, or use Next step to compare them one step at a time. When exploration finishes, select Show final paths to highlight each route.</p>
       </section>
 
       <footer><span>MazeQuest</span><span>Mehek Pun · 3232 &nbsp; | &nbsp; Yuvika Dahiya · 3261</span></footer>

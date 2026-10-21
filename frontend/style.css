@@ -108,28 +108,3 @@ footer span:first-child { color:var(--text); font-weight:700; }
 .compare-card .btn { margin-top:auto; }
 @media(max-width:700px) { .compare-card .btn { width:100%; } }
 
-/* Simple BFS vs DFS comparison graphs */
-.comparison-graph {
-  margin: 16px 0 20px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: #fbfcfe;
-}
-.comparison-graph h3 { margin: 0 0 3px; font-size: 14px; }
-.graph-hint { margin: 0 0 12px; color: var(--muted); font-size: 11px; }
-.path-graph-title { margin-top: 20px !important; }
-.bar-row {
-  display: grid;
-  grid-template-columns: 34px minmax(40px, 1fr) 48px;
-  align-items: center;
-  gap: 10px;
-  margin: 9px 0;
-  font-size: 12px;
-}
-.bar-row > span { font-weight: 700; color: var(--text); }
-.bar-row > strong { text-align: right; font-size: 12px; }
-.bar-track { height: 18px; overflow: hidden; border-radius: 3px; background: #e9eef5; }
-.bar { height: 100%; width: 0; border-radius: 3px; transition: width .25s ease; }
-.bfs-bar { background: #3978d4; }
-.dfs-bar { background: #42b96b; }

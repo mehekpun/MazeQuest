@@ -5,11 +5,6 @@
 #include <string>
 using namespace std;
 
-// MazeQuest C++ DSA implementation.
-// This file is the native C++ version for local compilation/practical demonstration.
-// The Vercel deployment uses frontend/script.js because Vercel static hosting does not
-// run a persistent native C++ server.
-
 class stack {
     int data[2000];
     int top;

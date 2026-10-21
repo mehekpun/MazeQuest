@@ -21,6 +21,7 @@ document.getElementById("back-home").addEventListener("click", () => {
 });
 
 function makeMaze() {
+  if (typeof stopComparison === "function") stopComparison();
   rows = Number(sizeinput.value);
   cols = rows === 11 ? 15 : rows === 21 ? 31 : 45;
   start = [1,1]; end = [rows-2, cols-2];
@@ -142,16 +143,6 @@ function search(algo) {
   return {found:true,explored,path};
 }
 
-function solve(algo=algoinput.value) {
-  const result = search(algo);
-  drawMaze(result.explored,result.path);
-  statusbox.innerHTML = result.found
-    ? `<i></i> PATH FOUND`
-    : "<i></i> NO PATH FOUND";
-  if (!result.found) alert("No path found in this maze.");
-  return result;
-}
-
 function showCongratulations() {
   if (document.getElementById("win-popup")) return;
   const popup = document.createElement("div");
@@ -174,13 +165,111 @@ function closeCongratulations() {
   if (popup) popup.remove();
 }
 
+let bfsResult = null, dfsResult = null;
+let visualStep = 0, showFinalRoutes = false, playTimer = null;
+
+function stopComparison() {
+  if (playTimer !== null) {
+    clearInterval(playTimer);
+    playTimer = null;
+  }
+  const playButton = document.getElementById("play-compare");
+  if (playButton) playButton.textContent = "▶ Play comparison";
+}
+
+function renderVisualMaze(targetId, result, step, showPath) {
+  const target = document.getElementById(targetId);
+  if (!target || !result) return;
+  const visitedOrder = new Map();
+  result.explored.slice(0, step).forEach((cell, index) => visitedOrder.set(cell.join(","), index + 1));
+  const pathSet = new Set(showPath ? result.path.map(cell => cell.join(",")) : []);
+  target.innerHTML = "";
+  target.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+  const fragment = document.createDocumentFragment();
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      const key = `${r},${c}`;
+      const value = grid[r][c];
+      const order = visitedOrder.get(key);
+      cell.className = "visual-cell";
+      if (value === "#") cell.classList.add("wall");
+      if (order) {
+        cell.classList.add("explored");
+        cell.textContent = order;
+        cell.title = `Processed step ${order}`;
+      }
+      if (pathSet.has(key)) {
+        cell.classList.add("route");
+        cell.title = "Final solution path";
+      }
+      if (value === "S") {
+        cell.classList.add("start");
+        cell.textContent = "S";
+        cell.title = "Start";
+      }
+      if (value === "E") {
+        cell.classList.add("end");
+        cell.textContent = "E";
+        cell.title = "Destination";
+      }
+      fragment.appendChild(cell);
+    }
+  }
+  target.appendChild(fragment);
+}
+
+function renderComparison() {
+  if (!bfsResult || !dfsResult) return;
+  const maxStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  const bfsSteps = Math.min(visualStep, bfsResult.explored.length);
+  const dfsSteps = Math.min(visualStep, dfsResult.explored.length);
+  renderVisualMaze("bfs-visual-maze", bfsResult, bfsSteps, showFinalRoutes);
+  renderVisualMaze("dfs-visual-maze", dfsResult, dfsSteps, showFinalRoutes);
+  document.getElementById("bfs-step-value").textContent = bfsSteps;
+  document.getElementById("dfs-step-value").textContent = dfsSteps;
+  document.getElementById("bfs-total-value").textContent = bfsResult.explored.length;
+  document.getElementById("dfs-total-value").textContent = dfsResult.explored.length;
+  document.getElementById("bfs-path-value").textContent = bfsResult.found ? `${bfsResult.path.length - 1} steps` : "No route";
+  document.getElementById("dfs-path-value").textContent = dfsResult.found ? `${dfsResult.path.length - 1} steps` : "No route";
+  const counter = document.getElementById("step-counter");
+  if (showFinalRoutes) counter.textContent = "Final routes highlighted";
+  else if (visualStep >= maxStep) counter.textContent = `Exploration complete · ${maxStep} steps shown`;
+  else counter.textContent = `Exploration step ${visualStep} of ${maxStep}`;
+  document.getElementById("step-compare").disabled = visualStep >= maxStep;
+}
+
+function startComparison() {
+  if (playTimer !== null) {
+    stopComparison();
+    return;
+  }
+  const maxStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  if (visualStep >= maxStep) {
+    visualStep = 0;
+    showFinalRoutes = false;
+    renderComparison();
+  }
+  document.getElementById("play-compare").textContent = "Ⅱ Pause";
+  const delay = Number(document.getElementById("animation-speed").value);
+  playTimer = setInterval(() => {
+    visualStep++;
+    showFinalRoutes = false;
+    renderComparison();
+    if (visualStep >= maxStep) stopComparison();
+  }, delay);
+}
+
 document.getElementById("generate").addEventListener("click", makeMaze);
 document.getElementById("reset").addEventListener("click", () => {
+  stopComparison();
   closeCongratulations();
   head = [...start];
   trail = [[...start]];
   lastResults = {};
   document.getElementById("comparison").classList.add("hidden");
+  document.getElementById("show-solution").textContent = "Show solution & compare BFS vs DFS";
+  document.getElementById("show-solution").setAttribute("aria-expanded", "false");
   drawMaze();
   statusbox.innerHTML = "<i></i> READY";
 });
@@ -190,32 +279,17 @@ document.getElementById("show-solution").addEventListener("click", () => {
   const button = document.getElementById("show-solution");
   const opening = section.classList.contains("hidden");
   if (opening) {
-    const bfs = search("bfs");
-    const dfs = search("dfs");
-    document.getElementById("bfs-length").textContent = bfs.found ? `${bfs.path.length - 1} steps` : "No route";
-    document.getElementById("bfs-explored").textContent = `Cells checked: ${bfs.explored.length}`;
-    document.getElementById("dfs-length").textContent = dfs.found ? `${dfs.path.length - 1} steps` : "No route";
-    document.getElementById("dfs-explored").textContent = `Cells checked: ${dfs.explored.length}`;
-
-    const exploredMax = Math.max(bfs.explored.length, dfs.explored.length, 1);
-    const bfsSteps = bfs.found ? bfs.path.length - 1 : 0;
-    const dfsSteps = dfs.found ? dfs.path.length - 1 : 0;
-    const pathMax = Math.max(bfsSteps, dfsSteps, 1);
-
-    document.getElementById("bfs-explored-bar").style.width = `${bfs.explored.length / exploredMax * 100}%`;
-    document.getElementById("dfs-explored-bar").style.width = `${dfs.explored.length / exploredMax * 100}%`;
-    document.getElementById("bfs-explored-value").textContent = bfs.explored.length;
-    document.getElementById("dfs-explored-value").textContent = dfs.explored.length;
-
-    document.getElementById("bfs-length-bar").style.width = `${bfsSteps / pathMax * 100}%`;
-    document.getElementById("dfs-length-bar").style.width = `${dfsSteps / pathMax * 100}%`;
-    document.getElementById("bfs-length-value").textContent = bfs.found ? bfsSteps : "—";
-    document.getElementById("dfs-length-value").textContent = dfs.found ? dfsSteps : "—";
-
+    stopComparison();
+    bfsResult = search("bfs");
+    dfsResult = search("dfs");
+    visualStep = 0;
+    showFinalRoutes = false;
     section.classList.remove("hidden");
     button.textContent = "Hide solution comparison";
     button.setAttribute("aria-expanded", "true");
+    renderComparison();
   } else {
+    stopComparison();
     section.classList.add("hidden");
     button.textContent = "Show solution & compare BFS vs DFS";
     button.setAttribute("aria-expanded", "false");
@@ -223,15 +297,29 @@ document.getElementById("show-solution").addEventListener("click", () => {
   }
 });
 
-document.getElementById("show-bfs").addEventListener("click", () => {
-  const result = search("bfs");
-  if (!result.found) return;
-  drawMaze(result.explored, result.path);
-  statusbox.innerHTML = "<i></i> SHORTEST ROUTE SHOWN";
+document.getElementById("play-compare").addEventListener("click", startComparison);
+document.getElementById("step-compare").addEventListener("click", () => {
+  stopComparison();
+  const maxStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  if (visualStep < maxStep) visualStep++;
+  showFinalRoutes = false;
+  renderComparison();
 });
-document.getElementById("show-dfs").addEventListener("click", () => {
-  const result = search("dfs");
-  if (!result.found) return;
-  drawMaze(result.explored, result.path);
-  statusbox.innerHTML = "<i></i> DFS ROUTE SHOWN";
+document.getElementById("restart-compare").addEventListener("click", () => {
+  stopComparison();
+  visualStep = 0;
+  showFinalRoutes = false;
+  renderComparison();
+});
+document.getElementById("show-final-paths").addEventListener("click", () => {
+  stopComparison();
+  visualStep = Math.max(bfsResult.explored.length, dfsResult.explored.length);
+  showFinalRoutes = true;
+  renderComparison();
+});
+document.getElementById("animation-speed").addEventListener("change", () => {
+  if (playTimer !== null) {
+    stopComparison();
+    startComparison();
+  }
 });
